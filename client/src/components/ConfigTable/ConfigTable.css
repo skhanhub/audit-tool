@@ -1,0 +1,14 @@
+.sticky-table-cell:hover {
+  background: gray;
+}
+
+.sticky-table-cell{
+  background: #343a40;
+  color: white;
+  text-align: center;
+}
+
+.sticky-table-cell#rowHeader{
+  width:15%
+}
+
