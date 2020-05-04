@@ -1,9 +1,10 @@
 .sticky-table-cell:hover {
-  background: gray;
+  background-color: gray;
 }
 
 .sticky-table-cell{
-  background: #343a40;
+  background-color: #343a40;
+  /* background: #343a40; */
   color: white;
   text-align: center;
 }

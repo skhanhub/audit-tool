@@ -11,6 +11,9 @@ const tableStyle = {
   marginTop: "4rem",
 }
 
+const tableCellStyle = {
+  backgroundColor: "#343a40",
+}
 export default function ConfigTable({configs: {configs, colHeader, rowHeaders, master}, loading, hostName}) {
     
   const [modal, setModal] = useState({
@@ -52,13 +55,13 @@ export default function ConfigTable({configs: {configs, colHeader, rowHeaders, m
      :<div style={tableStyle}>
      <StickyTable className="auditTable">
         <Row>
-          <Cell id="rowHeader" style={{textAlign: "center", fontWeight: "bold"}}>Path</Cell>
-          {colHeader.map((header)=><Cell style={{fontWeight: "bold"}} key={header}>{header}</Cell>)}
+          <Cell id="rowHeader" style={{backgroundColor: "#343a40", textAlign: "center", fontWeight: "bold"}}>Path</Cell>
+          {colHeader.map((header)=><Cell style={{backgroundColor: "#343a40", fontWeight: "bold"}} key={header}>{header}</Cell>)}
         </Row>
         {rowHeaders.map((path)=>{
           return (
             <Row key={path}>
-              <Cell id="rowHeader" >{path}</Cell>
+              <Cell id="rowHeader" style={tableCellStyle} >{path}</Cell>
               {colHeader.map((header, index)=>{
                 let icon = null;
                 let color = null;
@@ -76,7 +79,7 @@ export default function ConfigTable({configs: {configs, colHeader, rowHeaders, m
                   <Cell 
                     onClick={()=>compareConfig(configs[header][path], configs[master][path], path, master, header)} 
                     key={header+index} 
-                    style={{color:color, fontSize: "1.2rem", fontWeight: "bold"}}
+                    style={{backgroundColor: "#343a40", color:color, fontSize: "1.2rem", fontWeight: "bold"}}
                   >
                     {icon}
                   </Cell>
