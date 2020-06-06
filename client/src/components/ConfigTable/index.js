@@ -3,7 +3,7 @@ import {Table, Badge , Button} from "react-bootstrap"
 import { StickyTable, Row, Cell } from 'react-sticky-table';
 import ConfigModal from "../ConfigModal"
 import "./ConfigTable.css"
-
+import API from "../../utils/API";
 
 const tableStyle = {
   width: '100%', 
@@ -14,14 +14,14 @@ const tableStyle = {
 const tableCellStyle = {
   backgroundColor: "#343a40",
 }
-export default function ConfigTable({configs: {configs, colHeader, rowHeaders, master}, loading, hostName}) {
-    
+export default function ConfigTable({configs: {configs, colHeader, rowHeaders, master, comments, env, subCategory, serverType}, loading, hostName}) {
+
   const [modal, setModal] = useState({
     show: false,
     src: null,
     master: null,
   });
-
+  const [allComments, setAllComments] = useState((comments && comments.comments) || {})
   useEffect(()=>{
     console.log({configs, colHeader, rowHeaders, master})
   },[configs])
@@ -37,7 +37,27 @@ export default function ConfigTable({configs: {configs, colHeader, rowHeaders, m
       path
     });
   }
+  const handleSubmit = (path, comment) => {
 
+    console.log({comment, path, allComments})
+    
+    let temp = {...allComments, [path]: comment}
+    // if(allComments[path]){
+    //   temp ={...allComments[path], [path]: {...comment, [modalHeader]: comment}};
+    // }else{
+    //   temp ={[path]: {...comment, [modalHeader]: comment}};
+    // }
+    const payload = {
+      comments: temp,
+      env,
+      subCategory, 
+      serverType
+    }
+    console.log(payload)
+    API.saveComments(payload)
+    setAllComments(temp)
+    
+  }
   const handleClose = () => setModal({
     ...modal,
     show: false
@@ -50,6 +70,8 @@ export default function ConfigTable({configs: {configs, colHeader, rowHeaders, m
      {modal.show?
      <ConfigModal
       data={modal}
+      comments={allComments}
+      handleSubmit={handleSubmit}
       handleClose={handleClose}
      />
      :<div style={tableStyle}>

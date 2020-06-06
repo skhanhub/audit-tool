@@ -5,6 +5,7 @@ import moment from 'moment'
 import CompareByTimeForm from "../components/CompareByTimeForm";
 import ConfigTable from "../components/ConfigTable";
 import API from "../utils/API";
+import {sortFunction} from "../utils";
 
 export default function Audit(props) {
 
@@ -15,6 +16,7 @@ export default function Audit(props) {
     hostName: null,
     fromDate: null,
     toDate: null,
+    timeline: false
   })
   const [options, setOptions] = useState({});
   const [loading, setLoading] = useState(false);
@@ -48,6 +50,7 @@ export default function Audit(props) {
           hostName,
           fromDate,
           toDate,
+          timeline: false
         })
       }
       catch(err){
@@ -105,6 +108,14 @@ export default function Audit(props) {
         })
         break
       }
+      case "timeline":{
+        console.log("timeline")
+        setSelected({
+          ...selected,
+          timeline: event.target.checked,
+        })
+        break
+      }
       default:{
         setSelected({
           ...selected,
@@ -120,14 +131,32 @@ export default function Audit(props) {
     setError(null)
     setConfigs(null)
     setHostName(selected.hostName)
-    const fromTime = moment(selected.fromDate, "YYYY-MM-DD").valueOf()/1000
-    const toTime = moment(selected.toDate, "YYYY-MM-DD").valueOf()/1000
-    const filter = {
+    const fromTimeA = moment(selected.fromDate, "YYYY-MM-DD").valueOf()/1000
+    const toTimeA = fromTimeA + 86400
+    const fromTimeB = moment(selected.toDate, "YYYY-MM-DD").valueOf()/1000
+    const toTimeB = fromTimeB + 86400
+    let filter = {
       ...selected,
-      fromTime: fromTime,
-      toTime: toTime,
+
       type: "COMPARE_BY_TIME"
     }
+    if(selected.timeline){
+      filter = {
+        ...filter,
+        fromTime: fromTimeA,
+        toTime: fromTimeB,
+      }
+    }
+    else{
+      filter = {
+        ...filter,
+        fromTimeA,
+        toTimeA,
+        fromTimeB,
+        toTimeB,
+      }
+    }
+
     console.log({filter})
     let result;
     try{
@@ -150,14 +179,26 @@ export default function Audit(props) {
     }
     const master = moment.unix(result.data[0].time).format("DD-MM-YYYY")
     const masterConfig = result.data[0]
-    const rowHeaders = Object.keys(masterConfig.config);
-    const colHeader = result.data.map((config)=>moment.unix(config.time).format("DD-MM-YYYY"));
+    const rowHeaders = Object.keys(masterConfig.config).sort(sortFunction);
+    const colHeader = result.data.sort(sortFunction).map((config)=>moment.unix(config.time).format("DD-MM-YYYY"));
 
+    try{
+      result = await API.getComments(selected)
+    }catch(err){
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+    console.log(result.data)
     setConfigs({
       configs,
       colHeader,
       rowHeaders,
       master,
+      comments: result.data,
+      env: selected.env,
+      subCategory: selected.subCategory,
+      serverType: selected.serverType,
     })
     setLoading(false)
   }

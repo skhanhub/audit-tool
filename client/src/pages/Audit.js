@@ -5,6 +5,7 @@ import moment from 'moment'
 import AuditForm from "../components/AuditForm";
 import ConfigTable from "../components/ConfigTable";
 import API from "../utils/API";
+import {sortFunction} from "../utils";
 
 export default function Audit(props) {
 
@@ -32,8 +33,9 @@ export default function Audit(props) {
         console.log("loadOptions")
           const result = await API.getOptions()
           const data = result.data
-          setOptions(data)
           console.log({data})
+          setOptions(data)
+          
           const env = data.env[0]
           const subCategory = data[env].subCategory[0]
           const serverType = data[env][subCategory].serverType[0]
@@ -156,14 +158,26 @@ export default function Audit(props) {
     }
     const master = selected.master?selected.master:result.data[0].hostName
     const masterConfig = result.data.find((config)=>config.hostName===master)
-    const rowHeaders = Object.keys(masterConfig.config);
-    const colHeader = result.data.map((config)=>config.hostName).sort(function(x,y){ return x == selected.master ? -1 : y == selected.master ? 1 : 0; });
+    const rowHeaders = Object.keys(masterConfig.config).sort(sortFunction);
+    const colHeader = result.data.map((config)=>config.hostName).sort(sortFunction).sort(function(x,y){ return x == selected.master ? -1 : y == selected.master ? 1 : 0; });
 
+    try{
+      result = await API.getComments(selected)
+    }catch(err){
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+    console.log(result.data)
     setConfigs({
       configs,
       colHeader,
       rowHeaders,
       master,
+      comments: result.data,
+      env: selected.env,
+      subCategory: selected.subCategory,
+      serverType: selected.serverType,
     })
     setLoading(false)
   }

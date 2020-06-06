@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Form, Col, Button} from "react-bootstrap"
 import { Multiselect } from 'multiselect-react-dropdown';
 
-
+import {sortFunction} from "../../utils"
 
 export default function AuditForm({options, selected, handleInputChange, compareConfigs, loading}) {
     
@@ -26,21 +26,21 @@ export default function AuditForm({options, selected, handleInputChange, compare
     <Form.Group as={Col} controlId="formGridState">
       <Form.Label>Environment</Form.Label>
       <Form.Control name="env" as="select" onChange={handleInputChange} value={selected.env}>
-          {options.env&&options.env.map((env)=><option key={env} value={env} onChange={handleInputChange}>{env}</option>)}
+          {options.env&&options.env.sort(sortFunction).map((env)=><option key={env} value={env} onChange={handleInputChange}>{env}</option>)}
       </Form.Control>
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridState">
       <Form.Label>Sub Category</Form.Label>
       <Form.Control name="subCategory" as="select" onChange={handleInputChange} value={selected.subCategory}>
-          {selected.env&&options[selected.env].subCategory.map((subCategory)=><option key={subCategory} value={subCategory}>{subCategory}</option>)}
+          {selected.env&&options[selected.env].subCategory.sort(sortFunction).map((subCategory)=><option key={subCategory} value={subCategory}>{subCategory}</option>)}
       </Form.Control>
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridState">
       <Form.Label>Server Type</Form.Label>
       <Form.Control name="serverType" as="select" onChange={handleInputChange} value={selected.serverType}>
-          {selected.env&&options[selected.env][selected.subCategory].serverType.map((serverType)=><option  key={serverType} value={serverType}>{serverType}</option>)}
+          {selected.env&&options[selected.env][selected.subCategory].serverType.sort(sortFunction).map((serverType)=><option  key={serverType} value={serverType}>{serverType}</option>)}
       </Form.Control>
     </Form.Group>
 
@@ -67,6 +67,15 @@ export default function AuditForm({options, selected, handleInputChange, compare
         name="toDate"
         defaultValue={selected.toDate}
         onChange={handleInputChange}
+      />
+    </Form.Group>
+    <Form.Group as={Col} controlId="validationFormik01">
+      <Form.Label>Timeline</Form.Label>
+      <Form.Check
+        required
+        name="timeline"
+        onChange={handleInputChange}
+        defaultValue={selected.timeline}
       />
     </Form.Group>
     <Form.Group as={Col} controlId="formGridZip">

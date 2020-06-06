@@ -1,0 +1,20 @@
+"      IP Address  Port   Model  Use Alarms
+==========================================
+     10.83.154.7   162  unique       false
+       127.0.0.1   162  unique        true
+  10.126.172.168  8001  shared        true
+  10.126.172.162  8001  shared        true
+
+4 entries found.
+"
+
+
+"      IP Address  Port   Model  Use Alarms
+==========================================
+       127.0.0.1   162  unique        true
+  10.126.172.162  8001  shared        true
+  10.126.172.168  8001  shared        true
+     10.98.54.90   162  unique        true
+
+4 entries found.
+"

@@ -13,5 +13,11 @@ export default {
 //   // Saves a book to the database
   getConfigs: function(filter) {
     return axios.post("/api/configs", filter);
+  },
+  getComments: function(body) {
+    return axios.post("/api/comments", body);
+  },
+  saveComments: function(body) {
+    return axios.post("/api/comments/save", body);
   }
 };

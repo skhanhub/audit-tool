@@ -5,15 +5,22 @@ import moment from 'moment'
 import CompareTwoServersForm from "../components/CompareTwoServersForm";
 import ConfigTable from "../components/ConfigTable";
 import API from "../utils/API";
+import {sortFunction} from "../utils";
 
 export default function Audit(props) {
 
-  const [selected, setSelected] = useState({
+  const [selectedA, setSelectedA] = useState({
     env: null,
     subCategory: null,
     serverType: null,
-    hostA: null,
-    hostB: null,
+    host: null,
+    date: null,
+  })
+  const [selectedB, setSelectedB] = useState({
+    env: null,
+    subCategory: null,
+    serverType: null,
+    host: null,
     date: null,
   })
   const [options, setOptions] = useState({});
@@ -40,13 +47,20 @@ export default function Audit(props) {
           const hostName = data[env][subCategory][serverType].hostNames
           const hostA = hostName[0]
           const hostB = hostName.length > 1 ? hostName[1] : hostName[0]
-          setSelected({
+          setSelectedA({
             env,
             subCategory,
             serverType,
             hostName,
-            hostA,
-            hostB,
+            host:hostA,
+            date: moment().format("YYYY-MM-DD"),
+          })
+          setSelectedB({
+            env,
+            subCategory,
+            serverType,
+            hostName,
+            host:hostB,
             date: moment().format("YYYY-MM-DD"),
           })
       }
@@ -55,7 +69,7 @@ export default function Audit(props) {
       }
   };
 
-  const handleInputChange = (event) =>{
+  const handleInputChangeA = (event) =>{
     const { name, value } = event.target;
     switch(name){
       case "env":{
@@ -63,70 +77,127 @@ export default function Audit(props) {
         const subCategory = options[value].subCategory[0]
         const serverType = options[value][subCategory].serverType[0]
         const hostName = options[value][subCategory][serverType].hostNames
-        const hostA = hostName[0]
-        const hostB = hostName.length > 1 ? hostName[1] : hostName[0]
-        setSelected({
-          ...selected,
+        const host = hostName[0]
+        setSelectedA({
+          ...selectedA,
           env: value,
           subCategory,
           serverType,
-          hostA,
-          hostB,
+          host,
         })
         break
       }
       case "subCategory":{
         console.log("subCategory")
         const subCategory = value
-        const serverType = options[selected.env][subCategory].serverType[0]
-        const hostName = options[selected.env][subCategory][serverType].hostNames
-        const hostA = hostName[0]
-        const hostB = hostName.length > 1 ? hostName[1] : hostName[0]
-        setSelected({
-          ...selected,
+        const serverType = options[selectedA.env][subCategory].serverType[0]
+        const hostName = options[selectedA.env][subCategory][serverType].hostNames
+        const host = hostName[0]
+        setSelectedA({
+          ...selectedA,
           subCategory: subCategory,
           serverType: serverType,
           hostName: hostName,
-          hostA,
-          hostB,
+          host,
         })
         break
       }
       case "serverType":{
         console.log("serverType")
         const serverType = value
-        const hostName = options[selected.env][selected.subCategory][serverType].hostNames
-        const hostA = hostName[0]
-        const hostB = hostName.length > 1 ? hostName[1] : hostName[0]
-        setSelected({
-          ...selected,
+        const hostName = options[selectedA.env][selectedA.subCategory][serverType].hostNames
+        const host = hostName[0]
+        setSelectedA({
+          ...selectedA,
           serverType,
-          hostA,
-          hostB,
+          host,
         })
         break
       }
       default:{
-        setSelected({
-          ...selected,
+        setSelectedA({
+          ...selectedA,
           [name]: value,
         })
         break
       }
     } 
   }
-
+  const handleInputChangeB = (event) =>{
+    const { name, value } = event.target;
+    switch(name){
+      case "env":{
+        console.log("env")
+        const subCategory = options[value].subCategory[0]
+        const serverType = options[value][subCategory].serverType[0]
+        const hostName = options[value][subCategory][serverType].hostNames
+        const host = hostName[0]
+        setSelectedB({
+          ...selectedB,
+          env: value,
+          subCategory,
+          serverType,
+          host,
+        })
+        break
+      }
+      case "subCategory":{
+        console.log("subCategory")
+        const subCategory = value
+        const serverType = options[selectedB.env][subCategory].serverType[0]
+        const hostName = options[selectedB.env][subCategory][serverType].hostNames
+        const host = hostName[0]
+        setSelectedB({
+          ...selectedB,
+          subCategory: subCategory,
+          serverType: serverType,
+          hostName: hostName,
+          host,
+        })
+        break
+      }
+      case "serverType":{
+        console.log("serverType")
+        const serverType = value
+        const hostName = options[selectedB.env][selectedB.subCategory][serverType].hostNames
+        const host = hostName[0]
+        setSelectedB({
+          ...selectedB,
+          serverType,
+          host,
+        })
+        break
+      }
+      default:{
+        setSelectedB({
+          ...selectedB,
+          [name]: value,
+        })
+        break
+      }
+    } 
+  }
   const compareConfigs = async () => {
     setLoading(true)
     setError(null)
     setConfigs(null)
-    const fromTime = moment(selected.date, "YYYY-MM-DD").valueOf()/1000
-    const toTime = fromTime + 86400
+    const fromTimeA = moment(selectedA.date, "YYYY-MM-DD").valueOf()/1000
+    const toTimeA = fromTimeA + 86400
+    const fromTimeB = moment(selectedB.date, "YYYY-MM-DD").valueOf()/1000
+    const toTimeB = fromTimeB + 86400
     const filter = {
-      ...selected,
-      hostName: [selected.hostA, selected.hostB],
-      fromTime: fromTime,
-      toTime: toTime,
+      selectedA:{
+        ...selectedA,
+        hostName: selectedA.host,
+        fromTime: fromTimeA,
+        toTime: toTimeA,
+      },
+      selectedB:{
+        ...selectedB,
+        hostName: selectedB.host,
+        fromTime: fromTimeB,
+        toTime: toTimeB,
+      },
       type: "TWO_SERVERS"
     }
     let result;
@@ -149,14 +220,26 @@ export default function Audit(props) {
     }
     const master = result.data[0].hostName
     const masterConfig = result.data[0]
-    const rowHeaders = Object.keys(masterConfig.config);
-    const colHeader = result.data.map((config)=>config.hostName);
+    const rowHeaders = Object.keys(masterConfig.config).sort(sortFunction);
+    const colHeader = result.data.sort(sortFunction).map((config)=>config.hostName);
 
+    try{
+      result = await API.getComments(selectedA)
+    }catch(err){
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+    console.log(result.data)
     setConfigs({
       configs,
       colHeader,
       rowHeaders,
       master,
+      comments: result.data,
+      env: selectedA.env,
+      subCategory: selectedA.subCategory,
+      serverType: selectedA.serverType,
     })
     setLoading(false)
   }
@@ -164,9 +247,11 @@ export default function Audit(props) {
   return (
         <Container fluid>
           <CompareTwoServersForm 
-            selected={selected}
+            selectedA={selectedA}
+            selectedB={selectedB}
             options={options}
-            handleInputChange={handleInputChange}
+            handleInputChangeA={handleInputChangeA}
+            handleInputChangeB={handleInputChangeB}
             compareConfigs={compareConfigs}  
             loading={loading}    
           />
