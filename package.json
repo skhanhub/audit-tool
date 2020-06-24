@@ -24,7 +24,8 @@
   "homepage": "https://github.com/shas38/audit-tool#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.9.7"
+    "mongoose": "^5.9.7",
+    "react-sticky-table": "^5.1.4"
   },
   "devDependencies": {
     "concurrently": "^5.1.0",

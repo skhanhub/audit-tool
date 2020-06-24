@@ -81,7 +81,7 @@ export default function ConfigTable({data, handleClose, comments, env, subCatego
           {data.master.split("\n").map((master,i)=>{
             return (
               <tr key={i}>
-                {diff(master, data.src?data.src.split("\n")[i]:[], i, comment)}
+                {diff(master, data.src&&data.src.split("\n")[i]?data.src.split("\n")[i]:[], i, comment)}
               </tr>
             )
           })}
